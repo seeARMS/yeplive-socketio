@@ -1,1 +1,1 @@
-# YepLive Socket.IO web service
+# YepLive Socket.IO service
