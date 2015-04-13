@@ -1,8 +1,11 @@
 var app = require('express')(),
 	http = require('http').Server(app),
 	io = require('socket.io')(http),
-	config = require('./config');
+	config = require('./config'),
+	bodyParser = require('body-parser');
 
+
+app.use(bodyParser.urlencoded({ extended: false }));
 
 require('./routes')(app, io);
 
