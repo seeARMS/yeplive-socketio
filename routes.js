@@ -1,9 +1,10 @@
+"use strict";
+
 var	crypto = require('crypto'),
 	config = require('./config'),
 	request = require('request');
 
 var rooms = {};
-
 
 
 module.exports = function(app, io){
@@ -23,60 +24,82 @@ module.exports = function(app, io){
 	
 	// Initialize a new socket.io application, named 'chat'
 	var chat = io.on('connection', function (socket) {
-		//When client emits join
+
+		// When client emits join
 		socket.on('client:join', function(data){
-			//get the token and room(YepID)
+
+			// Get the token and room(YepID)
 			var token = data.token;
 			var room = data.room;
+
 			if(! room || ! token){
-				return socket.emit('server:error', {error:'invalid token'});	
+				return socket.emit('server:error', {error:'invalid token or channel'});	
 			}
-			//create header
-			var header = 'Bearer '+token;
-			//Check if token is valid
+
+			// Create header
+			var header = 'Bearer ' + token;
+
+			// Check if token is valid
 			getAPI('/me', header, function(err, res, body){
+
 				if(res.statusCode != 200){
 					return socket.emit('server:error', {error:'invalid token'});	
-				} 
-				var json = JSON.parse(body);
-				//Tell server new connection
-				postAPI('/internal/chat/'+room+'/connect', {}, header, function(err, res, body){
-					//return with list of messages in the room
+				}
+
+				// Cache user info
+				var userObj = JSON.parse(body);
+
+				// Update server: new connection
+				postAPI('/internal/chat/' + room + '/connect', {}, header, function(err, res, body){
+
+					// Return with list of messages in the room
 					if(res.statusCode !== 200){
 						return socket.emit('server:error', {error: 'room not found'});
 					}
-				//associate socket with the users data 
-				socket.userID = json.user_id;
-				socket.token = token;
-				socket.display_name = json.display_name === '' ? 'anonymous' : json.display_name;
-				//create a room for the socket
-				rooms[room] = rooms[room] || [];
-				//check if client already in room
-				for(var i = 0; i < rooms[room].length; i++){
-					if(rooms[room][i].userID === socket.userID){
-						return socket.emit('server:error', {error:'already connected to this room'});
-					}
-				}
-				//Add client to room	
-				rooms[room].push(socket);
-				//associate the socket with the toom
-				socket.room = room;
 
-					socket.emit('server:messages', {messages:JSON.parse(body)});
+					// Associate socket with the users data
+					socket.userID = userObj.user_id;
+					socket.token = token;
+					socket.display_name = userObj.display_name === '' ? 'anonymous' : userObj.display_name;
+
+					// Create a room for the socket
+					rooms[room] = rooms[room] || [];
+
+					// Check if client already in room
+					for(var i = 0; i < rooms[room].length; i++){
+						if(rooms[room][i].userID === socket.userID){
+							return socket.emit('server:error', {error:'already connected to this room'});
+						}
+					}
+
+					//Add client to room	
+					rooms[room].push(socket);
+
+					//associate the socket with the room
+					socket.room = room;
+
+					console.log('user id: ' + userObj.user_id + ' joined room: ' + room );
+					socket.emit('server:messages', {message:'successfully connected'});
 				});
 			}); 
 		});
 
-		//When client emits message
+		// When client emits message
 		socket.on('client:message', function(data){
+
 			//get the room from the socket
 			var room  = socket.room;
+
 			//validate message
 			var message = data.message;
+
+
 			if(data.message.length > 255){
 				return socket.emit('server:error', {error:'message too long'});	
 			}
+
 			//send message to server
+			/*
 			postAPI('/internal/chat/'+room+'/messages',
 				{
 					message: message
@@ -94,6 +117,19 @@ module.exports = function(app, io){
 						}
 					}	
 			});
+			*/
+
+			var numClients = rooms[room].length;
+
+			// Assign user id to message
+			data.userID = socket.userID;
+
+			// Broadcast to everyone in the room
+			for(var i = 0; i < numClients; i++){
+				if(socket.userID !== rooms[room][i].userID){
+					rooms[room][i].emit('server:messages', data);
+				}
+			}
 		});
 
 		socket.on('client:leave', function(data){
@@ -210,50 +246,59 @@ module.exports = function(app, io){
 	});
 };
 
-//Post request to the api
+// Post request to the api
 function postAPI(route, params, auth, cb) {
 	request({
 		method: 'POST',
 		uri: config.yeplive_api.host + '/api/v1' + route,
-	 headers: {
-		'Authorization': auth,
-	 },
-	form: params
-		}, cb);
+		headers: { 'Authorization': auth },
+		form: params
+	},cb);
 }
 
-//get request to the api
+// Get request to the api
 function getAPI(route, auth, cb) {
 	request({
 		method: 'GET',
 		uri: config.yeplive_api.host +'/api/v1'+ route,
-	 headers: {
-		'Authorization': auth,
-	 }
-		}, cb);
+		headers: { 'Authorization': auth }
+	}, cb);
 }
 
-//remove socket from room
+// Remove socket from room
 function leaveRoom(socket){	
+
 	var room = rooms[socket.room];
+
 	if(! socket.room){
 		return;
 	}
-	var numClients = room.length;	
-	for(var i = 0; i < numClients; i++){
+	var numClients = room.length;
+
+	// Remove the socket from room
+	for(var i = numClients-1 ; i >= 0; i--){
 		if(room[i].userID === socket.userID){
-			room[i].splice(i,1);
+			console.log('User: ' + room[i].userID + ' left room ' + socket.room);
+			room.splice(i,1);
 		}
 	}
-	console.log(room);
-	console.log(numClients);
-	console.log(room[i].length);
-	//inform server of disconnect
+	
+	/*
+	for(var i = 0 ; i < numClients ; i++){
+		if(room[i].userID === socket.userID){
+			room.splice(i,1);
+		}
+	}*/
+
+	// inform server of disconnect
 	postAPI('/internal/chat/'+socket.room+'/disconnect',
-				{}, 
-				'Bearer '+socket.token,
-				function(err, res, body){
-			});
+			{}, 
+			'Bearer ' + socket.token,
+			function(err, res, body){
+	});
+
+	socket.emit('server:messages', {message:'successfully disconnected'});
+	socket.disconnect();
 }
 
 /*
@@ -314,4 +359,4 @@ function findClientsSocket(io, roomId, namespace) {
 			);
 		}
 	});
-						*/
+*/

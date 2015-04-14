@@ -11,5 +11,5 @@ require('./routes')(app, io);
 
 
 http.listen(process.env.PORT || config.PORT, function(){
-  console.log('Yeplive real-time messaging now running on port ' + process.env.PORT );
+  console.log('Yeplive real-time messaging now running');
 });
