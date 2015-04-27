@@ -44,16 +44,20 @@ module.exports = function(app, io){
 		res.json('YepLive Real-time Messaging Server');
 	});
 
-		// Get the test file
-		console.log('testing');
-		app.get('/test', function(req, res){
-			res.sendFile(__dirname+'/index.html');
-		});
 
+	app.get('/test', function(req, res){
+		res.sendFile(__dirname+'/index.html');
+	});
+
+	// Get the test file
+	app.get('/test2', function(req, res){
+		res.sendFile(__dirname+'/index2.html');
+	});
 	
 	// Initialize a new socket.io application, named 'chat'
 	var chat = io.on('connection', function (socket) {
 		socket.on('join_room', function(data){
+
 			if(!data || ! data.roomId || ! data.userId || ! data.username ){
 				return socket.emit('server:error',{error: 'invalid parameters'});
 			}
@@ -69,6 +73,7 @@ module.exports = function(app, io){
 		});
 
 		socket.on('message', function(data){
+
 			if(! data || ! data.message || ! data.userId ){
 				return socket.emit('server:error',{error: 'invalid parameters'});
 			}
@@ -181,6 +186,7 @@ module.exports = function(app, io){
 				}
 			}
 		});
+		*/
 
 		socket.on('client:leave', function(data){
 			//disconnect socket from room
@@ -192,7 +198,7 @@ module.exports = function(app, io){
 			leaveRoom(socket);
 		});
 
-	*/
+	
 	});
 };
 
@@ -227,7 +233,7 @@ function getAPI(route, auth, cb) {
 function leaveRoom(socket){	
 
 	var room = rooms[socket.room];
-
+	//console.log(room);
 	if(! socket.room){
 		return;
 	}
@@ -240,6 +246,7 @@ function leaveRoom(socket){
 			room.splice(i,1);
 		}
 	}
+	//console.log(numClients);
 	postAPI('/internal/chat/'+socket.room+'/disconnect',
 			{}, 
 			'Bearer ' + socket.token,
