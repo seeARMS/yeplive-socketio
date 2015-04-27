@@ -10,6 +10,7 @@
 
 		<input id="userId" placeholder="userId" />
 		<input id="isUploader" placeholder="isUploader" />
+		<input id="displayName" placeholder="displayName" />
 		
 		<button id="connect">Connect</button>
 		<button id="diconnect">Disconnect</button>
@@ -19,6 +20,7 @@
 		<input id="message" placeholder="message" />
 		<button id="send">Send</button>
 		<button id="clear">Clear</button>
+
 		
 		<div id="output"></div>
 
@@ -48,6 +50,11 @@
 			*/
 
 
+			socket.on('getHistory', function(data){
+				console.log(data);
+			});
+
+
 			socket.on('message', function(data){
 				console.log(data);
 				var userId = data.userId ? 'user ' + data.userId + ': ' : '';
@@ -73,25 +80,26 @@
 				//console.log('connecting');
 				var roomId = $('#roomId').val();
 				var username = $('#username').val();
-				var userId = $('#userId').val();
+				var userId = parseInt($('#userId').val());
 				var isUploader = $('#isUploader').val();
+				var displayName = $('#displayName').val();
 
 				socket.emit('join_room', {
-					roomId:roomId,
+					roomId:parseInt(roomId),
 					username:username,
 					userId:userId,
-					isUploader:isUploader
+					isUploader:parseInt(isUploader),
+					displayName:displayName
 				});
 			});
 
 			$('#send').click(function(){
 				var message = $('#message').val();
-				var userId = $('#userId').val();
-				var room = $('#roomId').val();
+				var userId = parseInt($('#userId').val());
+
 				var message = {
 					message:message,
-					userId:userId,
-					room:room
+					userId:userId
 				}
 				socket.emit('message', message);
 				//$('#output').append('<br>' + 'You: ' + message.message);

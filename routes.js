@@ -61,13 +61,15 @@ module.exports = function(app, io){
 			if(!data || ! data.roomId || ! data.userId || ! data.username ){
 				return socket.emit('server:error',{error: 'invalid parameters'});
 			}
+			//Check to parseInt for userId, roomId, isUploader
+
 			socket.roomId = data.roomId;
-			socket.username = data.username;
 			socket.userId = data.userId;
-			socket.isUploader = data.isUploader || "false";
+			socket.isUploader = data.isUploader || 0;
+			socket.displayName = data.displayName;
 
 			rooms[socket.roomId] = rooms[socket.roomId] || new Room();
-			rooms[socket.roomId].join(socket);
+			rooms[socket.roomId].join(socket);	
 
 			socket.emit('getHistory', rooms[socket.roomId].getMessages());
 		});
@@ -77,14 +79,22 @@ module.exports = function(app, io){
 			if(! data || ! data.message || ! data.userId ){
 				return socket.emit('server:error',{error: 'invalid parameters'});
 			}
+
 			var message = data.message;
 			var userId = data.userId;
+
+
+			//Check if data.userId == socket.userId
+
 			var roomId = socket.room;
+			var displayName = socket.displayName;
+			var isUploader = socket.isUploader;
+
 			var message = {
-				message:data.message,
-				userId: data.userId,
-				username: socket.username,
-				isUploader:socket.isUploader
+				displayName: displayName,
+				message: message,
+				userId: userId,
+				isUploader: isUploader
 			};
 			
 			rooms[socket.roomId].message(message);
