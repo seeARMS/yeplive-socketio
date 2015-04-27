@@ -58,20 +58,20 @@ module.exports = function(app, io){
 	var chat = io.on('connection', function (socket) {
 		socket.on('join_room', function(data){
 
-			if(!data || ! data.roomId || ! data.userId || ! data.username ){
+			if(!data || ! data.yepId || ! data.userId || ! data.username ){
 				return socket.emit('server:error',{error: 'invalid parameters'});
 			}
-			//Check to parseInt for userId, roomId, isUploader
+			//Check to parseInt for userId, yepId, isUploader
 
-			socket.roomId = data.roomId;
+			socket.yepId = data.yepId;
 			socket.userId = data.userId;
 			socket.isUploader = data.isUploader || 0;
 			socket.displayName = data.displayName;
 
-			rooms[socket.roomId] = rooms[socket.roomId] || new Room();
-			rooms[socket.roomId].join(socket);	
+			rooms[socket.yepId] = rooms[socket.yepId] || new Room();
+			rooms[socket.yepId].join(socket);	
 
-			socket.emit('getHistory', rooms[socket.roomId].getMessages());
+			socket.emit('getHistory', rooms[socket.yepId].getMessages());
 		});
 
 		socket.on('message', function(data){
@@ -86,7 +86,7 @@ module.exports = function(app, io){
 
 			//Check if data.userId == socket.userId
 
-			var roomId = socket.room;
+			var yepId = socket.yepId;
 			var displayName = socket.displayName;
 			var isUploader = socket.isUploader;
 
@@ -97,12 +97,12 @@ module.exports = function(app, io){
 				isUploader: isUploader
 			};
 			
-			rooms[socket.roomId].message(message);
+			rooms[socket.yepId].message(message);
 		});
 
 		socket.on('disconnection', function(socket){
-			var roomId = socket.room;	
-			rooms[roomId].leave(socket);
+			var yepId = socket.room;	
+			rooms[yepId].leave(socket);
 		});
 
 
