@@ -58,7 +58,7 @@ module.exports = function(app, io){
 	var chat = io.on('connection', function (socket) {
 		socket.on('join_room', function(data){
 
-			if(!data || ! data.yepId || ! data.userId || ! data.username ){
+			if( !data || ! data.yepId || ! data.userId  ){
 				return socket.emit('server:error',{error: 'invalid parameters'});
 			}
 			//Check to parseInt for userId, yepId, isUploader

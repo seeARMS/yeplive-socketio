@@ -6,7 +6,6 @@
 		<h1>Testing Socket.io</h1>
 
 		<input id="roomId" placeholder="roomId" />
-		<input id="username" placeholder="username" />
 
 		<input id="userId" placeholder="userId" />
 		<input id="isUploader" placeholder="isUploader" />
@@ -41,8 +40,8 @@
 
 			*/
 
-			var socket = io('http://localhost:3000');
-
+			//var socket = io('dev-socketIO.elasticbeanstalk.com');
+			var socket = io('localhost:3000');
 			/*
 			socket.on('server:error', function(data){
 				$('#output').append('<br> Server Error: ' + data.error);
@@ -79,14 +78,12 @@
 			$('#connect').click(function(){
 				//console.log('connecting');
 				var roomId = $('#roomId').val();
-				var username = $('#username').val();
 				var userId = parseInt($('#userId').val());
 				var isUploader = $('#isUploader').val();
 				var displayName = $('#displayName').val();
 
 				socket.emit('join_room', {
 					yepId:parseInt(roomId),
-					username:username,
 					userId:userId,
 					isUploader:parseInt(isUploader),
 					displayName:displayName
