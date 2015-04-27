@@ -54,10 +54,13 @@ module.exports = function(app, io){
 	// Initialize a new socket.io application, named 'chat'
 	var chat = io.on('connection', function (socket) {
 		socket.on('join_room', function(data){
+			if(!data || ! data.roomId || ! data.userId || ! data.username ){
+				return socket.emit('server:error',{error: 'invalid parameters'});
+			}
 			socket.roomId = data.roomId;
 			socket.username = data.username;
 			socket.userId = data.userId;
-			socket.isUploader = data.isUploader;
+			socket.isUploader = data.isUploader || false;
 
 			rooms[socket.roomId] = rooms[socket.roomId] || new Room();
 			rooms[socket.roomId].join(socket);
@@ -66,6 +69,9 @@ module.exports = function(app, io){
 		});
 
 		socket.on('message', function(data){
+			if(! data || ! data.message || ! data.userId ){
+				return socket.emit('server:error',{error: 'invalid parameters'});
+			}
 			var message = data.message;
 			var userId = data.userId;
 			var roomId = socket.room;
