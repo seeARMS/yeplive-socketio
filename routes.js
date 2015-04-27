@@ -6,12 +6,14 @@ function Room(){
 }
 
 Room.prototype.getMessages = function(){
-	return this.messages;
+	var messages = this.messages;
+	var latestTenMessages = messages.slice(messages.length-10, messages.length);
+	return latestTenMessages;
 }
 
 Room.prototype.message = function(message){
-	this.messages.unshift(message);
-	this.messages.splice(10,1);
+	this.messages.push(message);
+	//this.messages.splice(0,1);
 	this.clients.forEach(function(client){
 		client.emit('message', message);
 	});
