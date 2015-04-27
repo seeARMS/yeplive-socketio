@@ -49,7 +49,7 @@
 
 
 			socket.on('message', function(data){
-				console.log('get');
+				console.log(data);
 				var userId = data.userId ? 'user ' + data.userId + ': ' : '';
 
 				$('#output').append('<br>' + userId + data.message);

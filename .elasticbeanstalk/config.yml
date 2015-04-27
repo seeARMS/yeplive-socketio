@@ -6,5 +6,5 @@ global:
   default_ec2_keyname: Terry-Laptop
   default_platform: 64bit Amazon Linux 2015.03 v1.3.0 running Node.js
   default_region: us-west-2
-  profile: eb-cli
+  profile: null
   sc: git

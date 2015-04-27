@@ -64,7 +64,7 @@ module.exports = function(app, io){
 			socket.roomId = data.roomId;
 			socket.username = data.username;
 			socket.userId = data.userId;
-			socket.isUploader = data.isUploader || false;
+			socket.isUploader = data.isUploader || "false";
 
 			rooms[socket.roomId] = rooms[socket.roomId] || new Room();
 			rooms[socket.roomId].join(socket);
@@ -83,7 +83,8 @@ module.exports = function(app, io){
 			var message = {
 				message:data.message,
 				userId: data.userId,
-				username: socket.username
+				username: socket.username,
+				isUploader:socket.isUploader
 			};
 			
 			rooms[socket.roomId].message(message);
