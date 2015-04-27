@@ -44,12 +44,11 @@ module.exports = function(app, io){
 		res.json('YepLive Real-time Messaging Server');
 	});
 
-	if(process.env.TEST){
 		// Get the test file
+		console.log('testing');
 		app.get('/test', function(req, res){
 			res.sendFile(__dirname+'/index.html');
 		});
-	}
 
 	
 	// Initialize a new socket.io application, named 'chat'
@@ -60,7 +59,7 @@ module.exports = function(app, io){
 			socket.userId = data.userId;
 			socket.isUploader = data.isUploader;
 
-			rooms[socket.roomId] = rooms[roomId] || new Room();
+			rooms[socket.roomId] = rooms[socket.roomId] || new Room();
 			rooms[socket.roomId].join(socket);
 
 			socket.emit('getHistory', rooms[socket.roomId].getMessages());
