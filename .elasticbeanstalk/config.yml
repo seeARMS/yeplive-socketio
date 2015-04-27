@@ -1,6 +1,6 @@
 branch-defaults:
   master:
-    environment: eb--dev
+    environment: null
 global:
   application_name: .
   default_ec2_keyname: null
