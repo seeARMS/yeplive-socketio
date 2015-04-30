@@ -1,5 +1,10 @@
 "use strict";
 
+/*
+function Socket(socket){
+	this.connection = socket;
+}
+
 function Room(){
 	this.messages = [];
 	this.clients = [];
@@ -31,6 +36,7 @@ Room.prototype.leave = function(socket){
 		}
 	}
 };
+*/
 
 var	crypto = require('crypto'),
 	config = require('./config'),
@@ -55,23 +61,55 @@ module.exports = function(app, io){
 	app.get('/test2', function(req, res){
 		res.sendFile(__dirname+'/index2.html');
 	});
+
+	app.post('/socket/yeps', function(req, res){
+		var yep = req.body;
+		io.to('global').emit('yep:new',yep);
+		res.status(200).json({success:true});
+	});
+
+	app.post('/socket/yeps/complete', function(req, res){
+		var yep = req.body;
+		io.to(yep.id).emit('yep:complete', yep);
+		res.status(200).json({success:true});
+	});
+
+	app.post('/socket/yeps/views', function(req, res){
+		var yep = req.body;
+		io.to(yep.id).emit('yep:view', yep);
+		res.status(200).json({success:true});	
+	});
+
+	app.post('/socket/yeps/votes', function(req, res){
+		var yep = req.body;
+		io.to(yep.id).emit('yep:vote', yep);
+		res.status(200).json({success:true});	
+	});
+
 	
 	// Initialize a new socket.io application, named 'chat'
 	var chat = io.on('connection', function (socket) {
+		io.join('global');
+
 		socket.on('join_room', function(data){
 
 			if( !data || ! data.yepId || ! data.userId  ){
 				return socket.emit('server:error',{error: 'invalid parameters'});
 			}
-			//Check to parseInt for userId, yepId, isUploader
 
-			socket.yepId = data.yepId;
 			socket.userId = data.userId;
 			socket.isUploader = data.isUploader || 0;
 			socket.displayName = data.displayName;
 
+			socket.join(data.yepId);
+			var clients = io.sockets.clients(data.yepId).length;
+			io.to(yep.id).emit('yep:connections', clients);
+
+/*
+
 			rooms[socket.yepId] = rooms[socket.yepId] || new Room();
 			rooms[socket.yepId].join(socket);	
+*/
 
 			socket.emit('getHistory', rooms[socket.yepId].getMessages());
 		});
@@ -82,24 +120,27 @@ module.exports = function(app, io){
 				return socket.emit('server:error',{error: 'invalid parameters'});
 			}
 
-			var message = data.message;
-			var userId = data.userId;
+			if(data.userId !== socket.userId){
+				return socket.emit('server:error',{error:'what r u doin'});
+			}
 
 
-			//Check if data.userId == socket.userId
-
-			var yepId = socket.yepId;
-			var displayName = socket.displayName;
-			var isUploader = socket.isUploader;
-
-			var message = {
-				displayName: displayName,
-				message: message,
-				userId: userId,
-				isUploader: isUploader
+			var data = {
+				displayName: socket.displayName,
+				userId: socket.userId,
+				message: data.message,
+				isUploader: socket.isUploader
 			};
-			
-			rooms[socket.yepId].message(message);
+
+			io.to(yep.id).emit('chat:message', data);
+		});
+
+		socket.on('leave_room', function(data){
+			if(!data || ! data.yepId || ! data.userId ){
+				return socket.emit('server:error', {error:'invalid parameters'});
+			}
+
+			socket.leave(data.yepId);
 		});
 
 		socket.on('disconnection', function(socket){
