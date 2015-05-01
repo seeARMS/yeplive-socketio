@@ -10,7 +10,10 @@ var rooms = {};
 
 function Chat(){
 	this.rooms = {};
-	this.redis = redis.createClient();
+	this.redis = redis.createClient(
+		config.redis.port, 
+		config.redis.host
+	);
 }
 
 
