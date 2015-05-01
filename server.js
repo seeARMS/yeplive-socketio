@@ -9,7 +9,7 @@ app.use(bodyParser.json({  }));
 
 require('./routes')(app, io);
 
-http.listen(80);/* process.env.PORT || config.PORT, function(){
+
+http.listen(process.env.PORT || config.PORT, function(){
   console.log('Yeplive real-time messaging now running');
 });
-*/

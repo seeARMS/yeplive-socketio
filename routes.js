@@ -1,63 +1,38 @@
 "use strict";
 
-/*
-function Socket(socket){
-	this.connection = socket;
-}
-
-function Room(){
-	this.messages = [];
-	this.clients = [];
-}
-
-Room.prototype.getMessages = function(){
-	var messages = this.messages;
-	var latestTenMessage = messages.slice(messages.length-10, messages.length);
-	return latestTenMessages;
-}
-
-Room.prototype.message = function(message){
-	this.messages.push(message);
-	//this.messages.splice(0,1);
-	this.clients.forEach(function(client){
-		client.emit('message', message);
-	});
-};
-
-Room.prototype.join = function(socket){
-	this.clients.push(socket);
-}
-
-Room.prototype.leave = function(socket){
-	var id = socket.userId;
-	for(var i = 0; i < this.clients.length; i++){
-		if(this.clients.userId === id){
-			this.messages.splice(i, 1);
-		}
-	}
-};
-*/
-
-function Chat(){
-	this.rooms = {};
-}
-
-Chat.prototype.message = function(room, message){
-	this.rooms[room] = this.rooms[room] || [];
-	this.rooms[room].push(message);	
-}
-
-Chat.prototype.getMessages = function(room){
-	return this.rooms[room] || [];
-}
-
-var chat = new Chat();
-
 var	crypto = require('crypto'),
 	config = require('./config'),
 	request = require('request');
 
+var redis = require('redis');
+
 var rooms = {};
+
+function Chat(){
+	this.rooms = {};
+	this.redis = redis.createClient();
+}
+
+
+Chat.prototype.message = function(room, message){
+	this.redis.append('chat:'+room, JSON.stringify(message)+',');
+};
+
+Chat.prototype.getMessages = function(room, cb){
+	var self = this;
+	this.redis.get('chat:'+room, function(err, res){
+		if(! res){
+			self.redis.set('chat:'+room,[], function(err){
+				cb(err, {messages:[]});
+			});
+		} else {
+			var jsonString = '{"messages":['+res.substring(0,res.length-1)+']}';
+			cb(err, JSON.parse(jsonString));
+		}
+	});
+};
+
+var chat = new Chat();
 
 
 module.exports = function(app, io){
@@ -120,10 +95,11 @@ module.exports = function(app, io){
 
 			var clients = io.nsps['/'].adapter.rooms[data.yepId].length;
 			io.to(data.yepId).emit('yep:connections', clients);
-			var response = {
-				messages: chat.getMessages(socket.yepId)
-			};
-			socket.emit('chat:history', response );
+
+			chat.getMessages(socket.yepId, function(err, res){
+				socket.emit('chat:history', res);
+			});
+
 		});
 
 		socket.on('message', function(data){

@@ -1,9 +1,10 @@
 module.exports = (function(){
-	return {
-		PORT: 3000,
-		yeplive_api : {
-			host : process.env['YEPLIVE_URL'] || 'http://api.dev.yeplive.com/',
-			port : ''
-		}
-	}
+
+	var conf = {};
+	
+	conf.redis = process.env.TESTING ? 
+		'localhost' : 'globalcache.fkjvwm.0001.usw2.cache.amazonaws.com';
+
+	return conf;
+
 }());
