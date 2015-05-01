@@ -1,0 +1,96 @@
+
+<!DOCTYPE html>
+<html>
+	<head>
+	</head>
+	<body>
+		<h1>Testing socket.io</h1>
+		<input placeholder="channel" id="channel" />
+		<input placeholder="user" id="user" />
+		<input placeholder="message" id="message" />
+		<button id="join">Join</button>
+		<button id="leave">Leave</button>
+		<button id="send">Send</button>
+		<pre id="output"></pre>
+		<script src="https://code.jquery.com/jquery-2.1.3.min.js"></script>
+		<script src="/socket.io/socket.io.js"></script>
+		<script>
+$(function(){
+	var socket = io.connect('http://localhost:3000');
+	$output = $('#output');
+
+	$('#send').click(function(){
+		var data = {
+			userId: $('#user').val(),
+			message: $('#message').val()
+		};
+		
+		socket.emit('message', data);
+	});
+
+	$('#join').click(function(){
+		var data = {
+			userId: $('#user').val(),
+			yepId: $('#channel').val(),
+			displayName: 'some user',
+			isUploader: false
+		};
+
+		socket.emit('join_room', data);
+	});
+
+	$('#leave').click(function(){
+		socket.emit('leave_room');
+	});
+
+	socket.on('yep:new', function(yep){
+		console.log(yep);
+		$output.append('new yep ' + yep.stream_name);
+		$output.append('<br>');
+	});
+
+	socket.on('yep:complete', function(yep){
+		console.log(yep);
+		$output.append('yep complete' + yep.stream_name);
+		$output.append('<br>');
+	});
+
+	socket.on('yep:view', function(data){
+		console.log(data);
+		$output.append('yep view' + data.view_count);
+		$output.append('<br>');
+	});
+
+	socket.on('yep:vote', function(data){
+		console.log(data);
+		$output.append('yep vote'+ data.vote_count);
+		$output.append('<br>');
+	});
+
+	socket.on('yep:connection', function(data){
+		console.log(data);
+		$output.append('yep connectsocketn'+data.connection_count);
+		$output.append('<br>');
+	});
+
+	socket.on('chat:history', function(data){
+		console.log(data);
+		data.messages.forEach(function(message){	
+			$output.append('chat messege:'+ message.message);
+		$output.append('<br>');
+		});
+	});
+
+	socket.on('chat:message', function(data){
+		console.log(data);
+		$output.append('chat message:' + data.message);
+		$output.append('<br>');
+	});
+
+	socket.on('server:error', function(data){
+		alert(data.error);
+	});
+
+});
+		</script>
+</script>

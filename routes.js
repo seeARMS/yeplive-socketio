@@ -12,7 +12,7 @@ function Room(){
 
 Room.prototype.getMessages = function(){
 	var messages = this.messages;
-	var latestTenMessages = messages.slice(messages.length-10, messages.length);
+	var latestTenMessage = messages.slice(messages.length-10, messages.length);
 	return latestTenMessages;
 }
 
@@ -38,6 +38,21 @@ Room.prototype.leave = function(socket){
 };
 */
 
+function Chat(){
+	this.rooms = {};
+}
+
+Chat.prototype.message = function(room, message){
+	this.rooms[room] = this.rooms[room] || [];
+	this.rooms[room].push(message);	
+}
+
+Chat.prototype.getMessages = function(room){
+	return this.rooms[room] || [];
+}
+
+var chat = new Chat();
+
 var	crypto = require('crypto'),
 	config = require('./config'),
 	request = require('request');
@@ -47,49 +62,48 @@ var rooms = {};
 
 module.exports = function(app, io){
 
-	// Index
+	// ndex
 	app.get('/', function(req,res){
 		res.json('YepLive Real-time Messaging Server');
 	});
 
 
 	app.get('/test', function(req, res){
-		res.sendFile(__dirname+'/index.html');
-	});
-
-	// Get the test file
-	app.get('/test2', function(req, res){
-		res.sendFile(__dirname+'/index2.html');
+		res.sendFile(__dirname+'/test.html');
 	});
 
 	app.post('/socket/yeps', function(req, res){
 		var yep = req.body;
+		console.log(yep);
 		io.to('global').emit('yep:new',yep);
 		res.status(200).json({success:true});
 	});
 
 	app.post('/socket/yeps/complete', function(req, res){
 		var yep = req.body;
+		console.log(yep);
 		io.to(yep.id).emit('yep:complete', yep);
 		res.status(200).json({success:true});
 	});
 
 	app.post('/socket/yeps/views', function(req, res){
 		var yep = req.body;
-		io.to(yep.id).emit('yep:view', yep);
+		console.log(yep);
+		io.to(yep.yep_id).emit('yep:view', yep);
 		res.status(200).json({success:true});	
 	});
 
 	app.post('/socket/yeps/votes', function(req, res){
 		var yep = req.body;
-		io.to(yep.id).emit('yep:vote', yep);
+		console.log(yep);
+		io.to(yep.yep_id).emit('yep:vote', yep);
 		res.status(200).json({success:true});	
 	});
 
 	
 	// Initialize a new socket.io application, named 'chat'
-	var chat = io.on('connection', function (socket) {
-		io.join('global');
+	var namespace= io.on('connection', function (socket) {
+		socket.join('global');
 
 		socket.on('join_room', function(data){
 
@@ -100,18 +114,16 @@ module.exports = function(app, io){
 			socket.userId = data.userId;
 			socket.isUploader = data.isUploader || 0;
 			socket.displayName = data.displayName;
+			socket.yepId = data.yepId;
 
 			socket.join(data.yepId);
-			var clients = io.sockets.clients(data.yepId).length;
-			io.to(yep.id).emit('yep:connections', clients);
 
-/*
-
-			rooms[socket.yepId] = rooms[socket.yepId] || new Room();
-			rooms[socket.yepId].join(socket);	
-*/
-
-			socket.emit('getHistory', rooms[socket.yepId].getMessages());
+			var clients = io.nsps['/'].adapter.rooms[data.yepId].length;
+			io.to(data.yepId).emit('yep:connections', clients);
+			var response = {
+				messages: chat.getMessages(socket.yepId)
+			};
+			socket.emit('chat:history', response );
 		});
 
 		socket.on('message', function(data){
@@ -125,22 +137,25 @@ module.exports = function(app, io){
 			}
 
 
-			var data = {
+			var message = {
 				displayName: socket.displayName,
 				userId: socket.userId,
 				message: data.message,
 				isUploader: socket.isUploader
 			};
 
-			io.to(yep.id).emit('chat:message', data);
+			chat.message(socket.yepId, message);
+			io.to(socket.yepId).emit('chat:message', data);
 		});
 
 		socket.on('leave_room', function(data){
+			/*
 			if(!data || ! data.yepId || ! data.userId ){
 				return socket.emit('server:error', {error:'invalid parameters'});
 			}
-
-			socket.leave(data.yepId);
+			*/
+			
+			socket.leave(socket.yepId);
 		});
 
 		socket.on('disconnection', function(socket){
@@ -208,7 +223,6 @@ module.exports = function(app, io){
 					//associate the socket with the room
 					socket.room = room;
 
-					console.log('user id: ' + userObj.user_id + ' joined room: ' + room );
 					socket.emit('server:messages', {message:'successfully connected'});
 				});
 		//	}); 
@@ -287,7 +301,6 @@ function getAPI(route, auth, cb) {
 function leaveRoom(socket){	
 
 	var room = rooms[socket.room];
-	//console.log(room);
 	if(! socket.room){
 		return;
 	}
@@ -296,11 +309,9 @@ function leaveRoom(socket){
 	// Remove the socket from room
 	for(var i = numClients-1 ; i >= 0; i--){
 		if(room[i].userID === socket.userID){
-			console.log('User: ' + room[i].userID + ' left room ' + socket.room);
 			room.splice(i,1);
 		}
 	}
-	//console.log(numClients);
 	postAPI('/internal/chat/'+socket.room+'/disconnect',
 			{}, 
 			'Bearer ' + socket.token,
