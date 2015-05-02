@@ -87,6 +87,7 @@ module.exports = function(app, io){
 
 		socket.on('join_room', function(data){
 			console.log(+Date.now());
+			console.log('join_room');
 			console.log(data);
 
 			if( !data || ! data.yep_id || ! data.user_id  ){
@@ -111,6 +112,9 @@ module.exports = function(app, io){
 		});
 
 		socket.on('message', function(data){
+			console.log(+Date.now());
+			console.log('message');
+			console.log(data);
 
 			if(! data || ! data.message || ! data.user_id ){
 				return socket.emit('server:error',{error: 'invalid parameters'});
@@ -122,7 +126,7 @@ module.exports = function(app, io){
 
 
 			var message = {
-				display_name: socket.display_id,
+				display_name: socket.display_name,
 				user_id: socket.user_id,
 				message: data.message,
 				picture_path: socket.picture_path
