@@ -84,19 +84,22 @@ module.exports = function(app, io){
 		socket.join('global');
 
 		socket.on('join_room', function(data){
+			console.log(+Date.now());
+			console.log(data);
 
 			if( !data || ! data.yep_id || ! data.user_id  ){
 				return socket.emit('server:error',{error: 'invalid parameters'});
 			}
 
 			socket.user_id = data.user_id;
-			socket.display_name= data.display_name;
-			socket.yep_id= data.yep_id;
+			socket.display_name = data.display_name;
+			socket.yep_id = data.yep_id;
 			socket.picture_path = data.picture_path;
 
 			socket.join(data.yep_id);
 
 			var clients = io.nsps['/'].adapter.rooms[data.yep_id].length;
+
 			io.to(data.yep_id).emit('yep:connections', clients);
 
 			chat.getMessages(socket.yep_id, function(err, res){
