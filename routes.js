@@ -81,6 +81,8 @@ module.exports = function(app, io){
 	
 	// Initialize a new socket.io application, named 'chat'
 	var namespace= io.on('connection', function (socket) {
+			console.log(+Date.now());
+			console.log('connection');
 		socket.join('global');
 
 		socket.on('join_room', function(data){
