@@ -132,7 +132,8 @@ module.exports = function(app, io){
 				picture_path: socket.picture_path
 			};
 
-			console.log('sending chat message to: '+socket.yep_id):
+			console.log('sending chat message to: '+socket.yep_id);
+			console.log(message);
 
 			chat.message(socket.yep_id, message);
 			io.to(socket.yep_id).emit('chat:message', data);
