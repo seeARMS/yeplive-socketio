@@ -40,7 +40,7 @@ var chat = new Chat();
 
 module.exports = function(app, io){
 
-	// ndex
+	// index
 	app.get('/', function(req,res){
 		res.json('YepLive Real-time Messaging Server');
 	});
@@ -85,21 +85,21 @@ module.exports = function(app, io){
 
 		socket.on('join_room', function(data){
 
-			if( !data || ! data.yepId || ! data.userId  ){
+			if( !data || ! data.yep_id || ! data.user_id  ){
 				return socket.emit('server:error',{error: 'invalid parameters'});
 			}
 
-			socket.userId = data.userId;
-			socket.isUploader = data.isUploader || 0;
-			socket.displayName = data.displayName;
-			socket.yepId = data.yepId;
+			socket.user_id = data.user_id;
+			socket.display_name= data.display_name;
+			socket.yep_id= data.yep_id;
+			socket.picture_path = data.picture_path;
 
-			socket.join(data.yepId);
+			socket.join(data.yep_id);
 
-			var clients = io.nsps['/'].adapter.rooms[data.yepId].length;
-			io.to(data.yepId).emit('yep:connections', clients);
+			var clients = io.nsps['/'].adapter.rooms[data.yep_id].length;
+			io.to(data.yep_id).emit('yep:connections', clients);
 
-			chat.getMessages(socket.yepId, function(err, res){
+			chat.getMessages(socket.yep_id, function(err, res){
 				socket.emit('chat:history', res);
 			});
 
@@ -107,39 +107,33 @@ module.exports = function(app, io){
 
 		socket.on('message', function(data){
 
-			if(! data || ! data.message || ! data.userId ){
+			if(! data || ! data.message || ! data.user_id ){
 				return socket.emit('server:error',{error: 'invalid parameters'});
 			}
 
-			if(data.userId !== socket.userId){
+			if(data.user_id !== socket.user_id){
 				return socket.emit('server:error',{error:'what r u doin'});
 			}
 
 
 			var message = {
-				displayName: socket.displayName,
-				userId: socket.userId,
+				display_name: socket.display_id,
+				user_id: socket.user_id,
 				message: data.message,
-				isUploader: socket.isUploader
+				picture_path: socket.picture_path
 			};
 
-			chat.message(socket.yepId, message);
-			io.to(socket.yepId).emit('chat:message', data);
+			chat.message(socket.yep_id, message);
+			io.to(socket.yep_id).emit('chat:message', data);
 		});
 
 		socket.on('leave_room', function(data){
-			/*
-			if(!data || ! data.yepId || ! data.userId ){
-				return socket.emit('server:error', {error:'invalid parameters'});
-			}
-			*/
 			
-			socket.leave(socket.yepId);
+			socket.leave(socket.yep_id);
 		});
 
 		socket.on('disconnection', function(socket){
-			var yepId = socket.room;	
-			rooms[yepId].leave(socket);
+			socket.leave(socket.yep_id);
 		});
 
 
