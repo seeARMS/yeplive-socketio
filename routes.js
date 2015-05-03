@@ -98,12 +98,15 @@ module.exports = function(app, io){
 			socket.display_name = data.display_name;
 			socket.yep_id = data.yep_id;
 			socket.picture_path = data.picture_path;
+			console.log(socket.picture_path);
 
 			socket.join(data.yep_id);
 
 			var clients = io.nsps['/'].adapter.rooms[data.yep_id].length;
 
-			io.to(data.yep_id).emit('yep:connections', clients);
+			io.to(data.yep_id).emit('yep:connection', {
+				connection_count: clients
+			});
 
 			chat.getMessages(socket.yep_id, function(err, res){
 				socket.emit('chat:history', res);
@@ -112,10 +115,6 @@ module.exports = function(app, io){
 		});
 
 		socket.on('message', function(data){
-			console.log(+Date.now());
-			console.log('message');
-			console.log(data);
-
 			if(! data || ! data.message || ! data.user_id ){
 				return socket.emit('server:error',{error: 'invalid parameters'});
 			}
@@ -124,6 +123,8 @@ module.exports = function(app, io){
 				return socket.emit('server:error',{error:'what r u doin'});
 			}
 
+			console.log(socket.picture_path);
+
 
 			var message = {
 				display_name: socket.display_name,
@@ -131,9 +132,6 @@ module.exports = function(app, io){
 				message: data.message,
 				picture_path: socket.picture_path
 			};
-
-			console.log('sending chat message to: '+socket.yep_id);
-			console.log(message);
 
 			chat.message(socket.yep_id, message);
 			io.to(socket.yep_id).emit('chat:message', data);
@@ -147,7 +145,6 @@ module.exports = function(app, io){
 		socket.on('disconnection', function(socket){
 			socket.leave(socket.yep_id);
 		});
-
 
 
 

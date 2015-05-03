@@ -17,12 +17,13 @@
 		<script>
 	//var socket = io.connect('http://dev-socketio.elasticbeanstalk.com');
 	//var socket = io.connect('http://54.149.251.168:3000/');
-	var socket = io.connect('/');
+//	var socket = io.connect('/');
+	var socket = io.connect('http://52.11.161.208:80');
 	$output = $('#output');
 
 	$('#send').click(function(){
 		var data = {
-			userId: $('#user').val(),
+			user_id: $('#user').val(),
 			message: $('#message').val()
 		};
 		
@@ -31,10 +32,9 @@
 
 	$('#join').click(function(){
 		var data = {
-			userId: $('#user').val(),
-			yepId: $('#channel').val(),
-			displayName: 'some user',
-			isUploader: false
+			user_id: $('#user').val(),
+			yep_id: $('#channel').val(),
+			display_name: 'some user'
 		};
 
 		socket.emit('join_room', data);
