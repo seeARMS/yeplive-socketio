@@ -123,9 +123,6 @@ module.exports = function(app, io){
 				return socket.emit('server:error',{error:'what r u doin'});
 			}
 
-			console.log(socket.picture_path);
-
-
 			var message = {
 				display_name: socket.display_name,
 				user_id: socket.user_id,
@@ -134,7 +131,7 @@ module.exports = function(app, io){
 			};
 
 			chat.message(socket.yep_id, message);
-			io.to(socket.yep_id).emit('chat:message', data);
+			io.to(socket.yep_id).emit('chat:message', message);
 		});
 
 		socket.on('leave_room', function(data){
