@@ -16,6 +16,25 @@ function Chat(){
 	);
 }
 
+Chat.prototype.connection = function(room){
+	this.redis.get('connection:'+room, function(err, res){
+		if(err){
+			return cb(err);
+		}
+		if(! res){
+			this.redis.set('connections:'+room, 1);
+		} else {
+			res++;
+			this.redis.set('connections:'+room, res);
+		}
+	});
+}
+
+Chat.prototype.getConnections = function(room, cb){
+	this.redis.get('connections:'+room,function(err, res){
+		cb(null, res);
+	}); 
+}
 
 Chat.prototype.message = function(room, message){
 	this.redis.append('chat:'+room, JSON.stringify(message)+',');
@@ -81,14 +100,9 @@ module.exports = function(app, io){
 	
 	// Initialize a new socket.io application, named 'chat'
 	var namespace= io.on('connection', function (socket) {
-			console.log(+Date.now());
-			console.log('connection');
 		socket.join('global');
 
 		socket.on('join_room', function(data){
-			console.log(+Date.now());
-			console.log('join_room');
-			console.log(data);
 
 			if( !data || ! data.yep_id || ! data.user_id  ){
 				return socket.emit('server:error',{error: 'invalid parameters'});
@@ -98,11 +112,13 @@ module.exports = function(app, io){
 			socket.display_name = data.display_name;
 			socket.yep_id = data.yep_id;
 			socket.picture_path = data.picture_path;
-			console.log(socket.picture_path);
 
 			socket.join(data.yep_id);
 
-			var clients = io.nsps['/'].adapter.rooms[data.yep_id].length;
+//			var clients = io.nsps['/'].adapter.rooms[data.yep_id].length || 1;
+			
+			var clients = Object.keys(io.nsps['/'].adapter.rooms[data.yep_id]).length;
+
 
 			io.to(data.yep_id).emit('yep:connection', {
 				connection_count: clients
