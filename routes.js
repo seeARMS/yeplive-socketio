@@ -72,6 +72,11 @@ module.exports = function(app, io){
 	app.post('/socket/yeps', function(req, res){
 		var yep = req.body;
 		console.log(yep);
+		if(yep.vod_enable){
+			yep.vod_enable = 1;
+		} else {
+			yep.vod_enable = 0;
+		}
 		io.to('global').emit('yep:new',yep);
 		res.status(200).json({success:true});
 	});
@@ -79,6 +84,11 @@ module.exports = function(app, io){
 	app.post('/socket/yeps/complete', function(req, res){
 		var yep = req.body;
 		console.log(yep);
+		if(yep.vod_enable){
+			yep.vod_enable = 1;
+		} else {
+			yep.vod_enable = 0;
+		}
 		io.to(yep.id).emit('yep:complete', yep);
 		res.status(200).json({success:true});
 	});
@@ -86,6 +96,11 @@ module.exports = function(app, io){
 	app.post('/socket/yeps/views', function(req, res){
 		var yep = req.body;
 		console.log(yep);
+		if(yep.vod_enable){
+			yep.vod_enable = 1;
+		} else {
+			yep.vod_enable = 0;
+		}
 		io.to(yep.yep_id).emit('yep:view', yep);
 		res.status(200).json({success:true});	
 	});
@@ -93,6 +108,11 @@ module.exports = function(app, io){
 	app.post('/socket/yeps/votes', function(req, res){
 		var yep = req.body;
 		console.log(yep);
+		if(yep.vod_enable){
+			yep.vod_enable = 1;
+		} else {
+			yep.vod_enable = 0;
+		}
 		io.to(yep.yep_id).emit('yep:vote', yep);
 		res.status(200).json({success:true});	
 	});
