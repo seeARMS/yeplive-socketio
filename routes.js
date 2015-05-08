@@ -77,6 +77,11 @@ module.exports = function(app, io){
 		} else {
 			yep.vod_enable = 0;
 		}
+		if(yep.portrait){
+			yep.portrait= 1;
+		} else {
+			yep.portrait= 0;
+		}
 		if(yep.staging === 0 || yep.staging === false){
 			io.to('global').emit('yep:new',yep);
 		}
@@ -91,7 +96,30 @@ module.exports = function(app, io){
 		} else {
 			yep.vod_enable = 0;
 		}
+		if(yep.portrait){
+			yep.portrait = 1;
+		} else {
+			yep.portrait = 0;
+		}
 		io.to(yep.id).emit('yep:complete', yep);
+		res.status(200).json({success:true});
+	});
+
+	app.post('/socket/yeps/delete', function(req ,res){	
+		var yep = req.body;
+		console.log(yep);
+		if(yep.vod_enable){
+			yep.vod_enable = 1;
+		} else {
+			yep.vod_enable = 0;
+		}
+		if(yep.portrait){
+			yep.portrait = 1;
+		} else {
+			yep.portrait = 0;
+		}
+				
+//		io.to(yep.id).emit('yep:delete', yep);
 		res.status(200).json({success:true});
 	});
 
