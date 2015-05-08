@@ -118,7 +118,7 @@ module.exports = function(app, io){
 		} else {
 			yep.portrait = 0;
 		}
-				
+		io.to('global').emit('yep:delete', yep);	
 //		io.to(yep.id).emit('yep:delete', yep);
 		res.status(200).json({success:true});
 	});
