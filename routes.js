@@ -77,7 +77,9 @@ module.exports = function(app, io){
 		} else {
 			yep.vod_enable = 0;
 		}
-		io.to('global').emit('yep:new',yep);
+		if(yep.staging === 0 || yep.staging === false){
+			io.to('global').emit('yep:new',yep);
+		}
 		res.status(200).json({success:true});
 	});
 
