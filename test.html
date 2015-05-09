@@ -50,6 +50,11 @@
 		$output.append('<br>');
 	});
 
+	socket.on('yep:status', function(data){
+		console.log(data);
+		$output.append(JSON.stringify(data));
+	});
+
 	socket.on('yep:complete', function(yep){
 		console.log(yep);
 		$output.append('yep complete' + yep.stream_name);

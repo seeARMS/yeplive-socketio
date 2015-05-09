@@ -184,7 +184,7 @@ module.exports = function(app, io){
 			if(! id){
 				return;
 			}
-			io.to(data.id).emit('yep:status', data);
+			io.to(id).emit('yep:status', data);
 		});
 
 		socket.on('message', function(data){
