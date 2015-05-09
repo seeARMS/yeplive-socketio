@@ -177,7 +177,14 @@ module.exports = function(app, io){
 			chat.getMessages(socket.yep_id, function(err, res){
 				socket.emit('chat:history', res);
 			});
+		});
 
+		socket.on('status', function(data){	
+			var id = socket.yep_id;
+			if(! id){
+				return;
+			}
+			io.to(data.id).emit('yep:status', data);
 		});
 
 		socket.on('message', function(data){
