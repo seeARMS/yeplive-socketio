@@ -101,7 +101,7 @@ module.exports = function(app, io){
 		} else {
 			yep.portrait = 0;
 		}
-		io.to(yep.id).emit('yep:complete', yep);
+		io.to('global').emit('yep:complete', yep);
 		res.status(200).json({success:true});
 	});
 
