@@ -168,24 +168,31 @@ module.exports = function(app, io){
 				return socket.emit('server:error',{error: 'invalid parameters'});
 			}
 
+			console.log(1);
+
 			socket.user_id = data.user_id;
 			socket.display_name = data.display_name;
 			socket.yep_id = data.yep_id;
 			socket.picture_path = data.picture_path;
 
+			console.log(2);
 			socket.join(data.yep_id);
+			console.log(3);
 
 //			var clients = io.nsps['/'].adapter.rooms[data.yep_id].length || 1;
 			
 			var clients = Object.keys(io.nsps['/'].adapter.rooms[data.yep_id]).length;
+			console.log(4);
 
 
 			io.to(data.yep_id).emit('yep:connection', {
 				connection_count: clients
 			});
+			console.log(5);
 
 			chat.getMessages(socket.yep_id, function(err, res){
 				socket.emit('chat:history', res);
+				console.log(6);
 			});
 		});
 
