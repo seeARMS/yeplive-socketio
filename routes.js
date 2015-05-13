@@ -81,6 +81,11 @@ module.exports = function(app, io){
 		} else {
 			yep.portrait= 0;
 		}
+		if(yep.front_facing){
+			yep.front_facing = 1;
+		} else {
+			yep.front_facing = 0;
+		}
 		if(yep.staging === 0 || yep.staging === false){
 			io.to('global').emit('yep:new',yep);
 		}
@@ -99,6 +104,12 @@ module.exports = function(app, io){
 		} else {
 			yep.portrait = 0;
 		}
+		if(yep.front_facing){
+			yep.front_facing = 1;
+		} else {
+			yep.front_facing = 0;
+		}
+
 		io.to('global').emit('yep:complete', yep);
 		res.status(200).json({success:true});
 	});
@@ -115,6 +126,12 @@ module.exports = function(app, io){
 		} else {
 			yep.portrait = 0;
 		}
+		if(yep.front_facing){
+			yep.front_facing = 1;
+		} else {
+			yep.front_facing = 0;
+		}
+
 		io.to('global').emit('yep:delete', yep);	
 //		io.to(yep.id).emit('yep:delete', yep);
 		res.status(200).json({success:true});
@@ -127,6 +144,17 @@ module.exports = function(app, io){
 		} else {
 			yep.vod_enable = 0;
 		}
+		if(yep.portrait){
+			yep.portrait = 1;
+		} else {
+			yep.portrait = 0;
+		}
+		if(yep.front_facing){
+			yep.front_facing = 1;
+		} else {
+			yep.front_facing = 0;
+		}
+
 		io.to(yep.yep_id).emit('yep:view', yep);
 		res.status(200).json({success:true});	
 	});
@@ -138,6 +166,18 @@ module.exports = function(app, io){
 		} else {
 			yep.vod_enable = 0;
 		}
+		if(yep.portrait){
+			yep.portrait = 1;
+		} else {
+			yep.portrait = 0;
+		}
+		if(yep.front_facing){
+			yep.front_facing = 1;
+		} else {
+			yep.front_facing = 0;
+		}
+
+
 		io.to(yep.yep_id).emit('yep:vote', yep);
 		res.status(200).json({success:true});	
 	});
@@ -168,31 +208,25 @@ module.exports = function(app, io){
 				return socket.emit('server:error',{error: 'invalid parameters'});
 			}
 
-			console.log(1);
 
 			socket.user_id = data.user_id;
 			socket.display_name = data.display_name;
 			socket.yep_id = data.yep_id;
 			socket.picture_path = data.picture_path;
 
-			console.log(2);
 			socket.join(data.yep_id);
-			console.log(3);
 
 //			var clients = io.nsps['/'].adapter.rooms[data.yep_id].length || 1;
 			
 			var clients = Object.keys(io.nsps['/'].adapter.rooms[data.yep_id]).length;
-			console.log(4);
 
 
 			io.to(data.yep_id).emit('yep:connection', {
 				connection_count: clients
 			});
-			console.log(5);
 
 			chat.getMessages(socket.yep_id, function(err, res){
 				socket.emit('chat:history', res);
-				console.log(6);
 			});
 		});
 
