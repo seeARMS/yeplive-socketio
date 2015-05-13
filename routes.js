@@ -71,7 +71,6 @@ module.exports = function(app, io){
 
 	app.post('/socket/yeps', function(req, res){
 		var yep = req.body;
-		console.log(yep);
 		if(yep.vod_enable){
 			yep.vod_enable = 1;
 		} else {
@@ -90,7 +89,6 @@ module.exports = function(app, io){
 
 	app.post('/socket/yeps/complete', function(req, res){
 		var yep = req.body;
-		console.log(yep);
 		if(yep.vod_enable){
 			yep.vod_enable = 1;
 		} else {
@@ -107,7 +105,6 @@ module.exports = function(app, io){
 
 	app.post('/socket/yeps/delete', function(req ,res){	
 		var yep = req.body;
-		console.log(yep);
 		if(yep.vod_enable){
 			yep.vod_enable = 1;
 		} else {
@@ -125,7 +122,6 @@ module.exports = function(app, io){
 
 	app.post('/socket/yeps/views', function(req, res){
 		var yep = req.body;
-		console.log(yep);
 		if(yep.vod_enable){
 			yep.vod_enable = 1;
 		} else {
@@ -137,7 +133,6 @@ module.exports = function(app, io){
 
 	app.post('/socket/yeps/votes', function(req, res){
 		var yep = req.body;
-		console.log(yep);
 		if(yep.vod_enable){
 			yep.vod_enable = 1;
 		} else {
@@ -150,9 +145,20 @@ module.exports = function(app, io){
 	
 	// Initialize a new socket.io application, named 'chat'
 	var namespace= io.on('connection', function (socket) {
+		console.log('CONNECTION');
+		console.log(+new Date());
+
 		socket.join('global');
 
+		socket.on('ping', function(data){
+			console.log('PING');
+			console.log(+new Date());
+		});
+
 		socket.on('join_room', function(data){
+			console.log('JOIN ROOM');
+			console.log(+new Date());
+			console.log(data);
 
 			if( !data || ! data.yep_id || ! data.user_id  ){
 				return socket.emit('server:error',{error: 'invalid parameters'});
