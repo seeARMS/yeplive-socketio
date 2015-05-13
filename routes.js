@@ -158,6 +158,10 @@ module.exports = function(app, io){
 		socket.on('join_room', function(data){
 			console.log('JOIN ROOM');
 			console.log(+new Date());
+			if(typeof data === 'string'){
+				console.log('data was string');
+				data = JSON.parse(data);
+			}
 			console.log(data);
 
 			if( !data || ! data.yep_id || ! data.user_id  ){
