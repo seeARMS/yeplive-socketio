@@ -231,6 +231,10 @@ module.exports = function(app, io){
 		});
 
 		socket.on('status', function(data){	
+			if(typeof data === 'string'){
+				console.log('data was string');
+				data = JSON.parse(data);
+			}
 			var id = socket.yep_id;
 			if(! id){
 				return;
@@ -239,6 +243,10 @@ module.exports = function(app, io){
 		});
 
 		socket.on('message', function(data){
+			if(typeof data === 'string'){
+				console.log('data was string');
+				data = JSON.parse(data);
+			}
 			if(! data || ! data.message || ! data.user_id ){
 				return socket.emit('server:error',{error: 'invalid parameters'});
 			}
