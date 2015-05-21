@@ -5,7 +5,6 @@ var	crypto = require('crypto'),
 	request = require('request');
 
 var redis = require('redis');
-
 var rooms = {};
 
 function Chat(){
@@ -29,6 +28,16 @@ Chat.prototype.connection = function(room){
 		}
 	});
 }
+
+Chat.prototype.getUsers = function(room, cb){
+	this.redis.get('users:'+room, function(err, res){
+		cb(null, res);
+	});
+}
+
+Chat.prototype.user = function(room, user){
+	this.redis.get('');
+};
 
 Chat.prototype.getConnections = function(room, cb){
 	this.redis.get('connections:'+room,function(err, res){
@@ -185,24 +194,16 @@ module.exports = function(app, io){
 	
 	// Initialize a new socket.io application, named 'chat'
 	var namespace= io.on('connection', function (socket) {
-		console.log('CONNECTION');
-		console.log(+new Date());
 
 		socket.join('global');
 
 		socket.on('ping', function(data){
-			console.log('PING');
-			console.log(+new Date());
 		});
 
 		socket.on('join_room', function(data){
-			console.log('JOIN ROOM');
-			console.log(+new Date());
 			if(typeof data === 'string'){
-				console.log('data was string');
 				data = JSON.parse(data);
 			}
-			console.log(data);
 
 			if( !data || ! data.yep_id || ! data.user_id  ){
 				return socket.emit('server:error',{error: 'invalid parameters'});
@@ -232,7 +233,6 @@ module.exports = function(app, io){
 
 		socket.on('status', function(data){	
 			if(typeof data === 'string'){
-				console.log('data was string');
 				data = JSON.parse(data);
 			}
 			var id = socket.yep_id;
@@ -244,7 +244,6 @@ module.exports = function(app, io){
 
 		socket.on('message', function(data){
 			if(typeof data === 'string'){
-				console.log('data was string');
 				data = JSON.parse(data);
 			}
 			if(! data || ! data.message || ! data.user_id ){
@@ -274,98 +273,6 @@ module.exports = function(app, io){
 		socket.on('disconnection', function(socket){
 			socket.leave(socket.yep_id);
 		});
-
-
-
-		// When client emits join
-		/*
-		socket.on('client:join', function(data){
-			if(! data){
-				return socket.emit('server:error', {error:'must specifiy data'});
-			}
-
-			// Get the token and room(YepID)
-			//var token = data.token;
-			var room = data.room;
-
-			if(! room ){
-				return socket.emit('server:error', {error:'invalid channel'});	
-			}
-
-			// Create header
-			var header = 'Bearer ' + token;
-
-			// Check if token is valid
-			//getAPI('/me', header, function(err, res, body){
-
-				if(res.statusCode != 200){
-					return socket.emit('server:error', {error:'invalid token'});	
-				}
-
-				// Cache user info
-				var userObj = JSON.parse(body);
-
-				// Update server: new connection
-				postAPI('/internal/chat/' + room + '/connect', {}, function(err, res, body){
-
-					// Return with list of messages in the room
-					if(res.statusCode !== 200){
-						return socket.emit('server:error', {error: 'room not found'});
-					}
-
-					// Associate socket with the users data
-					socket.userID = userObj.user_id;
-					socket.token = token;
-					socket.display_name = userObj.display_name === '' ? 'anonymous' : userObj.display_name;
-
-					// Create a room for the socket
-					rooms[room] = rooms[room] || [];
-
-					// Check if client already in room
-					for(var i = 0; i < rooms[room].length; i++){
-						if(rooms[room][i].userID === socket.userID){
-							return socket.emit('server:error', {error:'already connected to this room'});
-						}
-					}
-
-					//Add client to room	
-					rooms[room].push(socket);
-
-					//associate the socket with the room
-					socket.room = room;
-
-					socket.emit('server:messages', {message:'successfully connected'});
-				});
-		//	}); 
-		});
-
-		// When client emits message
-		socket.on('client:message', function(data){
-
-			//get the room from the socket
-			var room  = socket.room;
-
-			//validate message
-			var message = data.message;
-
-
-			if(data.message.length > 255){
-				return socket.emit('server:error', {error:'message too long'});	
-			}
-
-			var numClients = rooms[room].length;
-
-			// Assign user id to message
-			data.userID = socket.userID;
-
-			// Broadcast to everyone in the room
-			for(var i = 0; i < numClients; i++){
-				if(socket.userID !== rooms[room][i].userID){
-					rooms[room][i].emit('server:messages', data);
-				}
-			}
-		});
-		*/
 
 		socket.on('client:leave', function(data){
 			//disconnect socket from room
