@@ -5,21 +5,21 @@ var app = require('express')(),
 	io = require('socket.io')(http),
 	config = require('./config'),
 	bodyParser = require('body-parser'),
-	memwatch = require('memwatch'),
 	cluster = require('cluster'),
 	redis = require('socket.io-redis');
 
 
+/*
 var config = require('./config');
 
 num_processes = require('os').cpus().length;
 
+var memwatch = require('memwatch');
 memwatch.on('leak', function(info){
 	console.log('MEMORY LEAK INFO:');
 	console.log(info);
 });
 
-/*
 var adapter = io.adapter(redis({ host: config.redis.host, port: 6379 }));
 
 adapter.pubClient.on('error', function(){});
