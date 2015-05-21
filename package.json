@@ -6,6 +6,7 @@
     "body-parser": "^1.12.2",
     "express": "4.10.2",
     "memwatch": "^0.2.2",
+    "newrelic": "^1.19.1",
     "redis": "^0.12.1",
     "request": "latest",
     "socket.io": "1.2.0"
