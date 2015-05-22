@@ -68,9 +68,15 @@ Chat.prototype.removeUser = function(room, userID, cb){
 			copy.push(res.users[i]);
 		}
 		res.users = [];
+		var returns = 0;
 		self.redis.set('users:'+room,'', function(){
 			for(var i = 0; i < copy.length; i++){
-				self.addUser(room, copy[i]);
+				self.addUser(room, copy[i], function(){
+					returns++;
+					if(returns === copy.length){
+						cb();
+					}	
+				});
 			}
 		});
 	});
