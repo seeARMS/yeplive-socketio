@@ -292,7 +292,7 @@ module.exports = function(app, io){
 			}, function(){
 				console.log('get users');
 				chat.getUsers(socket.yep_id, function(err, res){
-					socket.emit('chat:users', res);
+					io.to(socket.yep_id).emit('chat:users', res);
 				});
 
 			});
