@@ -352,8 +352,12 @@ module.exports = function(app, io){
 		});
 
 		socket.on('leave_room', function(data){
+			console.log('leaving room');
 			chat.removeUser(socket.yep_id, socket.user_id, function(){
+				console.log('user removed');
 				chat.getUsers(socket.yep_id, function(err, res){
+					console.log('users');
+					console.log(res);
 					io.to(socket.yep_id).emit('chat:users', res);
 					socket.leave(socket.yep_id);
 				});
