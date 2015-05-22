@@ -63,6 +63,10 @@ Chat.prototype.removeUser = function(room, userID, cb){
 		var copy = [];
 
 		console.log(res);
+		console.log(typeof res);
+		console.log(typeof res.users);
+		console.log(res.users.length);
+
 
 		for(var i = 0; i < res.users.length; i++){
 			if (userID == res.users[i].user_id){
@@ -71,13 +75,17 @@ Chat.prototype.removeUser = function(room, userID, cb){
 			copy.push(res.users[i]);
 		}
 		
+		console.log(copy);
 		
 
 		res.users = [];
 		var returns = 0;
 		self.redis.set('users:'+room,'', function(){
 			for(var i = 0; i < copy.length; i++){
+				console.log(copy[i]);
 				self.addUser(room, copy[i], function(){
+				returns++;
+				console.log(returns);
 					if(returns === copy.length){
 						cb();
 					}	
