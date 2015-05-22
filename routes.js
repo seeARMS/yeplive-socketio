@@ -38,7 +38,6 @@ Chat.prototype.getUsers = function(room, cb){
 			});
 		} else {
 			var jsonString = '{"users":['+res.substring(0,res.length-1)+']}';
-			console.log(jsonString);
 			cb(err, JSON.parse(jsonString));
 		}
 	});
@@ -46,7 +45,6 @@ Chat.prototype.getUsers = function(room, cb){
 
 Chat.prototype.addUser = function(room,user, cb){
 	this.redis.append('users:'+room, JSON.stringify(user)+',', function(){
-		console.log(JSON.stringify(user));
 		if(cb){
 			cb(null);
 		}
@@ -70,9 +68,6 @@ Chat.prototype.removeUser = function(room, userID, cb){
 			copy.push(res.users[i]);
 		}
 		res.users = [];
-		console.log('nice');
-		console.log(res.users);
-		console.log(copy);
 		self.redis.set('users:'+room,'', function(){
 			for(var i = 0; i < copy.length; i++){
 				self.addUser(room, copy[i]);
@@ -267,7 +262,7 @@ module.exports = function(app, io){
 
 			io.to(data.yep_id).emit('yep:connection', {
 				connection_count: clients,
-				display_name: socket.display_name,
+				user_id: socket.user_id,
 				picture_path: socket.picture_path
 			});
 
