@@ -45,6 +45,7 @@ Chat.prototype.getUsers = function(room, cb){
 
 Chat.prototype.addUser = function(room,user, cb){
 	this.redis.append('users:'+room, JSON.stringify(user)+',', function(){
+		console.log('appeneded');
 		if(cb){
 			cb(null);
 		}
@@ -61,18 +62,29 @@ Chat.prototype.removeUser = function(room, userID, cb){
 
 		var copy = [];
 
+		console.log(res);
+
 		for(var i = 0; i < res.users.length; i++){
 			if (userID == res.users[i].user_id){
 				continue;			
 			}
 			copy.push(res.users[i]);
 		}
+		
+		
+
 		res.users = [];
 		var returns = 0;
+		console.log(returns);
 		self.redis.set('users:'+room,'', function(){
+			console.log(room);
+			console.log(copy);
 			for(var i = 0; i < copy.length; i++){
+					console.log('test'+i);
 				self.addUser(room, copy[i], function(){
+					console.log('test');
 					returns++;
+					console.log(returns);
 					if(returns === copy.length){
 						cb();
 					}	
