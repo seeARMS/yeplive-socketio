@@ -75,16 +75,9 @@ Chat.prototype.removeUser = function(room, userID, cb){
 
 		res.users = [];
 		var returns = 0;
-		console.log(returns);
 		self.redis.set('users:'+room,'', function(){
-			console.log(room);
-			console.log(copy);
 			for(var i = 0; i < copy.length; i++){
-					console.log('test'+i);
 				self.addUser(room, copy[i], function(){
-					console.log('test');
-					returns++;
-					console.log(returns);
 					if(returns === copy.length){
 						cb();
 					}	
