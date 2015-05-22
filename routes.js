@@ -30,14 +30,56 @@ Chat.prototype.connection = function(room){
 }
 
 Chat.prototype.getUsers = function(room, cb){
+	var self = this;
 	this.redis.get('users:'+room, function(err, res){
-		cb(null, res);
+		if(! res){
+			self.redis.set('users:'+room,[], function(err){
+				cb(err, {messages:[]});
+			});
+		} else {
+			var jsonString = '{"users":['+res.substring(0,res.length-1)+']}';
+			console.log(jsonString);
+			cb(err, JSON.parse(jsonString));
+		}
 	});
 }
 
-Chat.prototype.user = function(room, user){
-	this.redis.get('');
-};
+Chat.prototype.addUser = function(room,user, cb){
+	this.redis.append('users:'+room, JSON.stringify(user)+',', function(){
+		console.log(JSON.stringify(user));
+		if(cb){
+			cb(null);
+		}
+	});
+}
+
+Chat.prototype.removeUser = function(room, userID, cb){
+	var self = this;
+	this.getUsers(room, function(err, res){
+		if((typeof res) == 'string'){
+			console.log(res);
+			res = JSON.parse(res);
+		}
+
+		var copy = [];
+
+		for(var i = 0; i < res.users.length; i++){
+			if (userID == res.users[i].user_id){
+				continue;			
+			}
+			copy.push(res.users[i]);
+		}
+		res.users = [];
+		console.log('nice');
+		console.log(res.users);
+		console.log(copy);
+		self.redis.set('users:'+room,'', function(){
+			for(var i = 0; i < copy.length; i++){
+				self.addUser(room, copy[i]);
+			}
+		});
+	});
+}
 
 Chat.prototype.getConnections = function(room, cb){
 	this.redis.get('connections:'+room,function(err, res){
@@ -213,6 +255,7 @@ module.exports = function(app, io){
 			socket.user_id = data.user_id;
 			socket.display_name = data.display_name;
 			socket.yep_id = data.yep_id;
+			socket.is_uploader = data.is_uploader;
 			socket.picture_path = data.picture_path;
 
 			socket.join(data.yep_id);
@@ -223,8 +266,24 @@ module.exports = function(app, io){
 
 
 			io.to(data.yep_id).emit('yep:connection', {
-				connection_count: clients
+				connection_count: clients,
+				display_name: socket.display_name,
+				picture_path: socket.picture_path
 			});
+
+				console.log('add users');
+			chat.addUser(socket.yep_id,{
+				user_id: socket.user_id,
+				display_name: socket.display_name,
+				picture_path: socket.picture_path
+			}, function(){
+				console.log('get users');
+				chat.getUsers(socket.yep_id, function(err, res){
+					socket.emit('chat:users', res);
+				});
+
+			});
+
 
 			chat.getMessages(socket.yep_id, function(err, res){
 				socket.emit('chat:history', res);
@@ -260,14 +319,34 @@ module.exports = function(app, io){
 				message: data.message,
 				picture_path: socket.picture_path
 			};
+/*
+
+			var uploader = io.sockets.clients(socket.yep_id).filter(function(socket){
+				return socket.is_uploader == true;
+			});
+
+			if(uploader.length == 0){
+				request.post(process.env.YEPLIVE_API+'/api/v1/yeps/'+socket.yep_id'/chatPush', {
+					key: 'evaniscool',
+					user_id: socket.user_id
+				}, function(err, res, body){
+				});
+			}
+	*/
 
 			chat.message(socket.yep_id, message);
 			io.to(socket.yep_id).emit('chat:message', message);
 		});
 
 		socket.on('leave_room', function(data){
-			
-			socket.leave(socket.yep_id);
+			chat.removeUser(socket.yep_id, socket.user_id, function(){
+
+				chat.getUsers(socket.yep_id, function(err, res){
+					socket.emit('chat:users', res);
+				});
+				
+				socket.leave(socket.yep_id);
+			});
 		});
 
 		socket.on('disconnection', function(socket){

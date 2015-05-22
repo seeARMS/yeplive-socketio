@@ -4,6 +4,7 @@
   "description": "my first socket.io app",
   "dependencies": {
     "body-parser": "^1.12.2",
+    "bugsnag": "^1.6.4",
     "express": "4.10.2",
     "newrelic": "^1.19.1",
     "redis": "^0.12.1",

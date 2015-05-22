@@ -6,7 +6,10 @@ var app = require('express')(),
 	config = require('./config'),
 	bodyParser = require('body-parser'),
 	cluster = require('cluster'),
-	redis = require('socket.io-redis');
+	redis = require('socket.io-redis'),
+	bugsnag = require('bugsnag');
+
+bugsnag.register("607b0f3d3f70c594728cf47f6c99287d");
 
 
 /*

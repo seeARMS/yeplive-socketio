@@ -17,8 +17,8 @@
 		<script>
 	//var socket = io.connect('http://dev-socketio.elasticbeanstalk.com');
 	//var socket = io.connect('http://54.149.251.168:3000/');
-	//var socket = io.connect('/');
-	var socket = io.connect('http://52.11.161.208:80');
+	var socket = io.connect('/');
+//	var socket = io.connect('http://52.11.161.208:80');
 	$output = $('#output');
 
 	$('#send').click(function(){
@@ -94,6 +94,12 @@
 	socket.on('chat:message', function(data){
 		console.log(data);
 		$output.append('chat message:' + data.message);
+		$output.append('<br>');
+	});
+
+	socket.on('chat:users', function(data){
+		console.log(data);
+		$output.append('chat message:' + data.users);
 		$output.append('<br>');
 	});
 
