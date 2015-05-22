@@ -1,6 +1,6 @@
 branch-defaults:
   master:
-    environment: socketIo-production
+    environment: dev-socketIO
 global:
   application_name: Socket IO
   default_ec2_keyname: Terry-Laptop
