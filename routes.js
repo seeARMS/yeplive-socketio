@@ -2,7 +2,10 @@
 
 var	crypto = require('crypto'),
 	config = require('./config'),
-	request = require('request');
+	request = require('request'),
+	Log = require('winston');
+
+Log.info('LOGGING SETUP');
 
 var redis = require('redis');
 var rooms = {};
@@ -46,15 +49,12 @@ Chat.prototype.addUser = function(room,user, cb){
 	this.getUsers(room, function(err, res){
 		var inRoom = false;
 		for(var i = 0; i < res.users.length; i++){
-			console.log(res.users[i]);
 			if(res.users[i].user_id === user.user_id){
 				inRoom = true;
 			}
 		}
-		console.log(inRoom);
 		if(! inRoom){
 			self.redis.append('users:'+room, JSON.stringify(user)+',', function(){
-				console.log('appeneded');
 				if(cb){
 					cb(null);
 				}
@@ -70,17 +70,10 @@ Chat.prototype.removeUser = function(room, userID, cb){
 	var self = this;
 	this.getUsers(room, function(err, res){
 		if((typeof res) == 'string'){
-			console.log(res);
 			res = JSON.parse(res);
 		}
 
 		var copy = [];
-
-		console.log(res);
-		console.log(typeof res);
-		console.log(typeof res.users);
-		console.log(res.users.length);
-
 
 		for(var i = 0; i < res.users.length; i++){
 			if (userID == res.users[i].user_id){
@@ -89,7 +82,6 @@ Chat.prototype.removeUser = function(room, userID, cb){
 			copy.push(res.users[i]);
 		}
 		
-		console.log(copy);
 		
 
 		res.users = [];
@@ -269,6 +261,9 @@ module.exports = function(app, io){
 		});
 
 		socket.on('join_room', function(data){
+			Log.info("ROOM JOINED");
+			Log.info(data);
+
 			if(typeof data === 'string'){
 				data = JSON.parse(data);
 			}
@@ -299,13 +294,14 @@ module.exports = function(app, io){
 			});
 
 			if(data.version && data.version >= 1){
-				console.log('add users');
 				chat.addUser(socket.yep_id,{
 					user_id: socket.user_id,
 					display_name: socket.display_name,
 					picture_path: socket.picture_path
 				}, function(){
 					chat.getUsers(socket.yep_id, function(err, res){
+						Log.info("SENDING USERS:");
+						Log.info(res);
 						io.to(socket.yep_id).emit('chat:users', res);
 					});
 				});
@@ -313,6 +309,8 @@ module.exports = function(app, io){
 
 
 			chat.getMessages(socket.yep_id, function(err, res){
+				Log.info("SENDING CHAT HISTORY:");
+				Log.info(res);
 				socket.emit('chat:history', res);
 			});
 		});
@@ -329,6 +327,8 @@ module.exports = function(app, io){
 		});
 
 		socket.on('message', function(data){
+			Log.info("NEW MESSAGE:");
+			Log.info(data);
 			if(typeof data === 'string'){
 				data = JSON.parse(data);
 			}
@@ -362,15 +362,21 @@ module.exports = function(app, io){
 	*/
 
 			chat.message(socket.yep_id, message);
+			Log.info("SENDING MESSAGE:");
+			Log.info(message);
 			io.to(socket.yep_id).emit('chat:message', message);
 		});
 
 		socket.on('leave_room', function(data){
+			Log.info("LEAVING ROOM:");
+			Log.info(data);
 			var yep_id = socket.yep_id;
 			socket.leave(socket.yep_id);
 			if(socket.version && socket.version >= 1){
 				chat.removeUser(socket.yep_id, socket.user_id, function(){
 					chat.getUsers(socket.yep_id, function(err, res){
+						Log.info("SENDING USERS AFTER DISCONNECT:");
+						Log.info(res);
 						io.to(yep_id).emit('chat:users', res);
 					});
 				});
@@ -378,20 +384,19 @@ module.exports = function(app, io){
 		});
 
 		socket.on('disconnection', function(socket){
+			Log.info("SOCKET DISCONNECTION");
 			socket.leave(socket.yep_id);
-		});
+			if(socket.version && socket.version >= 1){
+				chat.removeUser(socket.yep_id, socket.user_id, function(){
+					chat.getUsers(socket.yep_id, function(err, res){
+						Log.info("SENDING USERS AFTER DISCONNECT:");
+						Log.info(res);
+						io.to(yep_id).emit('chat:users', res);
+					});
+				});
+			}
 
-		socket.on('client:leave', function(data){
-			//disconnect socket from room
-			leaveRoom(socket);	
 		});
-
-		socket.on('disconnect', function(socket){
-			//disconnect socket from room
-			leaveRoom(socket);
-		});
-
-	
 	});
 };
 

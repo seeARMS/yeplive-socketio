@@ -39,3 +39,13 @@
 {"v":0,"level":30,"name":"newrelic","hostname":"dazappa.private","pid":3895,"time":"2015-05-23T01:53:04.943Z","msg":"Starting New Relic for Node.js connection process."}
 {"v":0,"level":30,"name":"newrelic","hostname":"dazappa.private","pid":3895,"time":"2015-05-23T01:53:06.473Z","msg":"Reporting to: https://rpm.newrelic.com/accounts/652129/applications/8877479","component":"new_relic_response"}
 {"v":0,"level":30,"name":"newrelic","hostname":"dazappa.private","pid":3895,"time":"2015-05-23T01:53:06.474Z","msg":"Connected to collector-123.newrelic.com:443 with agent run ID 38128488050459022.","component":"collector_api"}
+{"v":0,"level":30,"name":"newrelic","hostname":"dazappa.private","pid":4703,"time":"2015-05-23T02:09:34.967Z","msg":"Starting New Relic for Node.js connection process."}
+{"v":0,"level":30,"name":"newrelic","hostname":"dazappa.private","pid":4703,"time":"2015-05-23T02:09:36.592Z","msg":"Reporting to: https://rpm.newrelic.com/accounts/652129/applications/8877479","component":"new_relic_response"}
+{"v":0,"level":30,"name":"newrelic","hostname":"dazappa.private","pid":4703,"time":"2015-05-23T02:09:36.592Z","msg":"Connected to collector-123.newrelic.com:443 with agent run ID 38128488050502243.","component":"collector_api"}
+{"v":0,"level":30,"name":"newrelic","hostname":"dazappa.private","pid":12767,"time":"2015-05-23T20:02:10.734Z","msg":"Starting New Relic for Node.js connection process."}
+{"v":0,"level":30,"name":"newrelic","hostname":"dazappa.private","pid":12808,"time":"2015-05-23T20:02:19.748Z","msg":"Starting New Relic for Node.js connection process."}
+{"v":0,"level":30,"name":"newrelic","hostname":"dazappa.private","pid":12808,"time":"2015-05-23T20:02:21.008Z","msg":"Reporting to: https://rpm.newrelic.com/accounts/652129/applications/8877479","component":"new_relic_response"}
+{"v":0,"level":30,"name":"newrelic","hostname":"dazappa.private","pid":12808,"time":"2015-05-23T20:02:21.009Z","msg":"Connected to collector-123.newrelic.com:443 with agent run ID 38128488052590843.","component":"collector_api"}
+{"v":0,"level":30,"name":"newrelic","hostname":"dazappa.private","pid":12850,"time":"2015-05-23T20:02:34.143Z","msg":"Starting New Relic for Node.js connection process."}
+{"v":0,"level":30,"name":"newrelic","hostname":"dazappa.private","pid":12850,"time":"2015-05-23T20:02:35.374Z","msg":"Reporting to: https://rpm.newrelic.com/accounts/652129/applications/8877479","component":"new_relic_response"}
+{"v":0,"level":30,"name":"newrelic","hostname":"dazappa.private","pid":12850,"time":"2015-05-23T20:02:35.374Z","msg":"Connected to collector-123.newrelic.com:443 with agent run ID 38128488052591269.","component":"collector_api"}

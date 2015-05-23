@@ -8,6 +8,7 @@
 		<input placeholder="channel" id="channel" />
 		<input placeholder="user" id="user" />
 		<input placeholder="message" id="message" />
+		<input placeholder="version" id="version" />
 		<button id="join">Join</button>
 		<button id="leave">Leave</button>
 		<button id="send">Send</button>
@@ -34,7 +35,8 @@
 		var data = {
 			user_id: $('#user').val(),
 			yep_id: $('#channel').val(),
-			display_name: 'some user'
+			display_name: 'some user',
+			version: parseInt($('#version').val())
 		};
 
 		socket.emit('join_room', data);
