@@ -256,6 +256,8 @@ module.exports = function(app, io){
 	// Initialize a new socket.io application, named 'chat'
 	var namespace= io.on('connection', function (socket) {
 
+		Log.info("NEW CONNECTION");
+
 		socket.join('global');
 
 		socket.on('ping', function(data){
