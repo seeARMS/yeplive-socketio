@@ -130,6 +130,8 @@ var chat = new Chat();
 module.exports = function(app, io){
 
 	// index
+	require('winston-logs-display')(app, Log);
+
 	app.get('/', function(req,res){
 		res.json('YepLive Real-time Messaging Server');
 	});
