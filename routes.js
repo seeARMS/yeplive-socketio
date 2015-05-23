@@ -6,6 +6,7 @@ var	crypto = require('crypto'),
 	Log = require('winston');
 
 Log.info('LOGGING SETUP');
+Log.add(Log.transports.File, { filename: 'socket.log' });
 
 var redis = require('redis');
 var rooms = {};
