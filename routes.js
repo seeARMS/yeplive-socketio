@@ -33,9 +33,7 @@ Chat.prototype.getUsers = function(room, cb){
 	var self = this;
 	this.redis.get('users:'+room, function(err, res){
 		if(! res){
-			self.redis.set('users:'+room,[], function(err){
-				cb(err, {messages:[]});
-			});
+			cb(null, {users:[]});
 		} else {
 			var jsonString = '{"users":['+res.substring(0,res.length-1)+']}';
 			cb(err, JSON.parse(jsonString));
@@ -44,12 +42,28 @@ Chat.prototype.getUsers = function(room, cb){
 }
 
 Chat.prototype.addUser = function(room,user, cb){
-	this.redis.append('users:'+room, JSON.stringify(user)+',', function(){
-		console.log('appeneded');
-		if(cb){
+	var self = this;
+	this.getUsers(room, function(err, res){
+		var inRoom = false;
+		for(var i = 0; i < res.users.length; i++){
+			console.log(res.users[i]);
+			if(res.users[i].user_id === user.user_id){
+				inRoom = true;
+			}
+		}
+		console.log(inRoom);
+		if(! inRoom){
+			self.redis.append('users:'+room, JSON.stringify(user)+',', function(){
+				console.log('appeneded');
+				if(cb){
+					cb(null);
+				}
+			});
+		} else {
 			cb(null);
 		}
 	});
+			
 }
 
 Chat.prototype.removeUser = function(room, userID, cb){
@@ -70,7 +84,7 @@ Chat.prototype.removeUser = function(room, userID, cb){
 
 		for(var i = 0; i < res.users.length; i++){
 			if (userID == res.users[i].user_id){
-				continue;			
+				continue;
 			}
 			copy.push(res.users[i]);
 		}
@@ -82,10 +96,8 @@ Chat.prototype.removeUser = function(room, userID, cb){
 		var returns = 0;
 		self.redis.set('users:'+room,'', function(){
 			for(var i = 0; i < copy.length; i++){
-				console.log(copy[i]);
 				self.addUser(room, copy[i], function(){
 				returns++;
-				console.log(returns);
 					if(returns === copy.length){
 						cb();
 					}	
