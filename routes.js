@@ -283,6 +283,7 @@ module.exports = function(app, io){
 			socket.yep_id = data.yep_id;
 			socket.is_uploader = data.is_uploader;
 			socket.picture_path = data.picture_path;
+			socket.version = data.version;
 
 			socket.join(data.yep_id);
 
@@ -297,18 +298,18 @@ module.exports = function(app, io){
 				picture_path: socket.picture_path
 			});
 
+			if(data.version && data.version >= 1){
 				console.log('add users');
-			chat.addUser(socket.yep_id,{
-				user_id: socket.user_id,
-				display_name: socket.display_name,
-				picture_path: socket.picture_path
-			}, function(){
-				console.log('get users');
-				chat.getUsers(socket.yep_id, function(err, res){
-					io.to(socket.yep_id).emit('chat:users', res);
+				chat.addUser(socket.yep_id,{
+					user_id: socket.user_id,
+					display_name: socket.display_name,
+					picture_path: socket.picture_path
+				}, function(){
+					chat.getUsers(socket.yep_id, function(err, res){
+						io.to(socket.yep_id).emit('chat:users', res);
+					});
 				});
-
-			});
+			}
 
 
 			chat.getMessages(socket.yep_id, function(err, res){
@@ -367,11 +368,13 @@ module.exports = function(app, io){
 		socket.on('leave_room', function(data){
 			var yep_id = socket.yep_id;
 			socket.leave(socket.yep_id);
-			chat.removeUser(socket.yep_id, socket.user_id, function(){
-				chat.getUsers(socket.yep_id, function(err, res){
-					io.to(yep_id).emit('chat:users', res);
+			if(socket.version && socket.version >= 1){
+				chat.removeUser(socket.yep_id, socket.user_id, function(){
+					chat.getUsers(socket.yep_id, function(err, res){
+						io.to(yep_id).emit('chat:users', res);
+					});
 				});
-			});
+			}
 		});
 
 		socket.on('disconnection', function(socket){
