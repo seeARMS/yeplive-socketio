@@ -311,12 +311,14 @@ module.exports = function(app, io){
 					picture_path: socket.picture_path
 				}, function(){
 					getAPI('/yeps/'+socket.yep_id, function(err, res){
-						if(typeof res == 'string'){
+						if((typeof res) == 'string'){
 							res = JSON.parse(res);
 						}
+						Log.info('GET YEP:');
+						Log.info(res);
 						if(res.vod_enable){
 							getAPI('/yeps/'+socket.yep_id+'/user-views', function(err, res){
-								if(typeof res == 'string'){
+								if((typeof res) == 'string'){
 									res = JSON.parse(res);
 								}
 								var json = res.map(function(val){
