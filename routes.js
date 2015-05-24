@@ -298,11 +298,6 @@ module.exports = function(app, io){
 			var clients = Object.keys(io.nsps['/'].adapter.rooms[data.yep_id]).length;
 
 
-			io.to(data.yep_id).emit('yep:connection', {
-				connection_count: clients,
-				user_id: socket.user_id,
-				picture_path: socket.picture_path
-			});
 
 			if(data.version && data.version >= 1){
 				chat.addUser(socket.yep_id,{
@@ -332,6 +327,11 @@ module.exports = function(app, io){
 									users: json
 								};
 								io.to(socket.yep_id).emit('chat:users', data);
+								io.to(data.yep_id).emit('yep:connection', {
+									connection_count: data.users.length,
+									user_id: socket.user_id,
+									picture_path: socket.picture_path
+								});
 							});
 						} else {
 							chat.getUsers(socket.yep_id, function(err, res){
@@ -339,9 +339,21 @@ module.exports = function(app, io){
 								Log.info(res);
 								io.to(socket.yep_id).emit('chat:users', res);
 							});
+							io.to(data.yep_id).emit('yep:connection', {
+								connection_count: clients,
+								user_id: socket.user_id,
+								picture_path: socket.picture_path
+							});
 						}
 					});
 				});
+			} else {
+			io.to(data.yep_id).emit('yep:connection', {
+				connection_count: clients,
+				user_id: socket.user_id,
+				picture_path: socket.picture_path
+			});
+
 			}
 
 
