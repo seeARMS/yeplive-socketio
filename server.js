@@ -12,6 +12,9 @@ var app = require('express')(),
 bugsnag.register("607b0f3d3f70c594728cf47f6c99287d");
 
 
+io.set('heartbeat interval', 5);
+io.set('heartbeat timeout', 11);
+
 /*
 var config = require('./config');
 
