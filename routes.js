@@ -305,14 +305,14 @@ module.exports = function(app, io){
 					display_name: socket.display_name,
 					picture_path: socket.picture_path
 				}, function(){
-					getAPI('/yeps/'+socket.yep_id, function(err, res){
-						if((typeof res) == 'string'){
-							res = JSON.parse(res);
+					getAPI('/yeps/'+socket.yep_id, function(err, res, body){
+						if((typeof body) == 'string'){
+							body= JSON.parse(body);
 						}
 						Log.info('GET YEP:');
-						Log.info(res);
-						Log.info(res.vod_enable);
-						if(res.vod_enable){
+						Log.info(body);
+						Log.info(body.vod_enable);
+						if(body.vod_enable){
 							socket.vod = true;
 							getAPI('/yeps/'+socket.yep_id+'/user-views', function(err, res){
 								if((typeof res) == 'string'){
