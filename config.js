@@ -9,6 +9,10 @@ module.exports = (function(){
 		port:6379 
 	};
 
+	conf.yeplive_api = {
+		host: 'http://yplv.tv'
+	};
+
 	console.log(conf.redis);
 
 	return conf;
