@@ -312,6 +312,7 @@ module.exports = function(app, io){
 						Log.info('GET YEP:');
 						Log.info(res);
 						if(res.vod_enable){
+							socket.vod = true;
 							getAPI('/yeps/'+socket.yep_id+'/user-views', function(err, res){
 								if((typeof res) == 'string'){
 									res = JSON.parse(res);
@@ -334,6 +335,7 @@ module.exports = function(app, io){
 								});
 							});
 						} else {
+							socket.vod = false;
 							chat.getUsers(socket.yep_id, function(err, res){
 								Log.info("SENDING USERS:");
 								Log.info(res);
@@ -422,13 +424,15 @@ module.exports = function(app, io){
 			var yep_id = socket.yep_id;
 			socket.leave(socket.yep_id);
 			if(socket.version && socket.version >= 1){
-				chat.removeUser(socket.yep_id, socket.user_id, function(){
-					chat.getUsers(socket.yep_id, function(err, res){
-						Log.info("SENDING USERS AFTER DISCONNECT:");
-						Log.info(res);
-						io.to(yep_id).emit('chat:users', res);
+				if(! socket.vod){
+					chat.removeUser(socket.yep_id, socket.user_id, function(){
+						chat.getUsers(socket.yep_id, function(err, res){
+							Log.info("SENDING USERS AFTER DISCONNECT:");
+							Log.info(res);
+							io.to(yep_id).emit('chat:users', res);
+						});
 					});
-				});
+				}
 			}
 		});
 
