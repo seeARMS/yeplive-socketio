@@ -55,6 +55,12 @@ Chat.prototype.addUser = function(room,user, cb){
 			}
 		}
 		if(! inRoom){
+			postAPI('/yeps/'+room+'/user-views',{
+				key:'evaniscool',
+				user_id: user
+			},function(){
+				Log.info('set user views'+user+'in yep '+room);
+			});
 			self.redis.append('users:'+room, JSON.stringify(user)+',', function(){
 				if(cb){
 					cb(null);
@@ -304,10 +310,34 @@ module.exports = function(app, io){
 					display_name: socket.display_name,
 					picture_path: socket.picture_path
 				}, function(){
-					chat.getUsers(socket.yep_id, function(err, res){
-						Log.info("SENDING USERS:");
-						Log.info(res);
-						io.to(socket.yep_id).emit('chat:users', res);
+					getAPI('/yeps/'+socket.yep_id, function(err, res){
+						if(typeof res == 'string'){
+							res = JSON.parse(res);
+						}
+						if(res.vod_enable){
+							getAPI('/yeps/'+socket.yep_id+'/user-views', function(err, res){
+								if(typeof res == 'string'){
+									res = JSON.parse(res);
+								}
+								var json = res.map(function(val){
+									return {
+										display_name: val.user.display_name,
+										user_id: val.user.user_id,
+										picture_path: val.user.picture_path
+									};
+								});
+								var data = {
+									users: json
+								};
+								io.to(socket.yep_id).emit('chat:users', data);
+							});
+						} else {
+							chat.getUsers(socket.yep_id, function(err, res){
+								Log.info("SENDING USERS:");
+								Log.info(res);
+								io.to(socket.yep_id).emit('chat:users', res);
+							});
+						}
 					});
 				});
 			}
