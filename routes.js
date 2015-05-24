@@ -437,7 +437,7 @@ module.exports = function(app, io){
 
 // Post request to the api
 function postAPI(route, params, auth, cb) {
-	if(typeof auth == 'function'){
+	if((typeof auth) == 'function'){
 		cb = auth;
 		return request({
 			method: 'POST',
@@ -455,6 +455,15 @@ function postAPI(route, params, auth, cb) {
 
 // Get request to the api
 function getAPI(route, auth, cb) {
+	if((typeof auth) == 'function'){
+		cb = auth;
+		return request({
+			method: 'POST',
+			uri: config.yeplive_api.host + '/api/v1' + route,
+			form: params
+		},cb);
+	}
+
 	request({
 		method: 'GET',
 		uri: config.yeplive_api.host +'/api/v1'+ route,
