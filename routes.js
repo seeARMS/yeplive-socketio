@@ -314,11 +314,11 @@ module.exports = function(app, io){
 						Log.info(body.vod_enable);
 						if(body.vod_enable){
 							socket.vod = true;
-							getAPI('/yeps/'+socket.yep_id+'/user-views', function(err, res){
-								if((typeof res) == 'string'){
-									res = JSON.parse(res);
+							getAPI('/yeps/'+socket.yep_id+'/user-views', function(err, res,body){
+								if((typeof body) == 'string'){
+									body = JSON.parse(body);
 								}
-								var json = res.map(function(val){
+								var json = body.map(function(val){
 									return {
 										display_name: val.user.display_name,
 										user_id: val.user.user_id,
