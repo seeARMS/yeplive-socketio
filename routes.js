@@ -57,7 +57,7 @@ Chat.prototype.addUser = function(room,user, cb){
 		if(! inRoom){
 			postAPI('/yeps/'+room+'/user-views',{
 				key:'evaniscool',
-				user_id: user
+				user_id: user.user_id
 			},function(){
 				Log.info('set user views'+user+'in yep '+room);
 			});
