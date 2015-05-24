@@ -300,11 +300,6 @@ module.exports = function(app, io){
 
 
 			if(data.version && data.version >= 1){
-				chat.addUser(socket.yep_id,{
-					user_id: socket.user_id,
-					display_name: socket.display_name,
-					picture_path: socket.picture_path
-				}, function(){
 					getAPI('/yeps/'+socket.yep_id, function(err, res, body){
 						if((typeof body) == 'string'){
 							body= JSON.parse(body);
@@ -336,6 +331,11 @@ module.exports = function(app, io){
 								});
 							});
 						} else {
+						chat.addUser(socket.yep_id,{
+							user_id: socket.user_id,
+							display_name: socket.display_name,
+							picture_path: socket.picture_path
+						}, function(){
 							socket.vod = false;
 							chat.getUsers(socket.yep_id, function(err, res){
 								Log.info("SENDING USERS:");
@@ -347,8 +347,8 @@ module.exports = function(app, io){
 								user_id: socket.user_id,
 								picture_path: socket.picture_path
 							});
-						}
-					});
+						});
+					}
 				});
 			} else {
 			io.to(data.yep_id).emit('yep:connection', {
