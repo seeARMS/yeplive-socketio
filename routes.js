@@ -458,9 +458,8 @@ function getAPI(route, auth, cb) {
 	if((typeof auth) == 'function'){
 		cb = auth;
 		return request({
-			method: 'POST',
+			method: 'GET',
 			uri: config.yeplive_api.host + '/api/v1' + route,
-			form: params
 		},cb);
 	}
 
