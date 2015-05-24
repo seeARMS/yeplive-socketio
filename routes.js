@@ -311,6 +311,7 @@ module.exports = function(app, io){
 						}
 						Log.info('GET YEP:');
 						Log.info(res);
+						Log.info(res.vod_enable);
 						if(res.vod_enable){
 							socket.vod = true;
 							getAPI('/yeps/'+socket.yep_id+'/user-views', function(err, res){
